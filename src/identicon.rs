@@ -8,7 +8,7 @@ pub struct Identicon {
     pub hex: Vec<u8>,
     pub color: Vec<u8>,
     pub grid: Vec<(u8, u8)>,
-    pub pixel_map: Vec<((usize, usize), (usize, usize))>,
+    pub pixel_map: Vec<((u8, u8), (u8, u8))>,
 }
 
 impl Identicon {
@@ -58,14 +58,14 @@ impl Identicon {
     }
 
     pub fn filter_odd_squares(&mut self) {
-        // let filtered: Vec<u8> = self
-        //     .grid
-        //     .clone()
-        //     .into_iter()
-        //     .filter(|x| x % 2 == 0)
-        //     .collect();
+        let filtered: Vec<(u8, u8)> = self
+            .grid
+            .clone()
+            .into_iter()
+            .filter(|x| x.0 % 2 == 0)
+            .collect();
 
-        // self.grid = filtered;
+        self.grid = filtered;
     }
 
     pub fn draw_image(&mut self) {
@@ -117,11 +117,11 @@ impl Identicon {
     }
 
     pub fn build_pixel_map(&mut self) {
-        let mut pixel_map: Vec<((usize, usize), (usize, usize))> = vec![];
-        for index in 0..self.grid.len() {
+        let mut pixel_map: Vec<((u8, u8), (u8, u8))> = vec![];
+        for item in self.grid.clone() {
             // let mut index = 0;
-            let horizontal = (index % 5) * 50;
-            let vertical = (index / 5) * 50;
+            let horizontal = (item.1 % 5) * 50;
+            let vertical = (item.1 / 5) * 50;
 
             let top_left = (horizontal, vertical);
             let bottom_right = (horizontal + 50, vertical + 50);
@@ -155,14 +155,14 @@ impl Identicon {
     }
 }
 
-// [ x    y  |   x    y
-// ((0,   0),  (50,  50)),
-// ((50,  0),  (100, 50)),
-// ((100, 0),  (150, 50)),
-// ((150, 0),  (200, 50)),
-// ((200, 0),  (250, 50)),
-// ((0,   50), (50,  100)),
-// ((50,  50), (100, 100)),
-// ((100, 50), (150, 100)),
-// ((150, 50), (200, 100))
+// [   X         Y
+// ((50, 0), (100, 50)),
+// ((150, 0), (200, 50)),
+// ((0, 50), (50, 100)),
+// ((150, 50), (200, 100)),
+// ((50, 100), (100, 150)),
+// ((100, 100), (150, 150)),
+// ((200, 100), (250, 150)),
+// ((0, 150), (50, 200)),
+// ((150, 200), (200, 250))
 // ]
