@@ -7,7 +7,7 @@ use md5;
 pub struct Identicon {
     pub hex: Vec<u8>,
     pub color: Vec<u8>,
-    pub grid: Vec<u8>,
+    pub grid: Vec<(u8, u8)>,
     pub pixel_map: Vec<((usize, usize), (usize, usize))>,
 }
 
@@ -43,21 +43,29 @@ impl Identicon {
             grid.push(mirror_row(chunk));
         }
 
-        let flatened = grid.into_iter().flatten().collect();
-        // println!("{:?}", flatened);
+        let flatened: Vec<u8> = grid.into_iter().flatten().collect();
 
-        self.grid = flatened;
+        let mut flat_with_index: Vec<(u8, u8)> = vec![];
+
+        let mut index: u8 = 1;
+        for item in flatened {
+            flat_with_index.push((item, index));
+            index += 1;
+        }
+
+        self.grid = flat_with_index;
+        // println!("{:?}", flatened);
     }
 
     pub fn filter_odd_squares(&mut self) {
-        let filtered: Vec<u8> = self
-            .grid
-            .clone()
-            .into_iter()
-            .filter(|x| x % 2 == 0)
-            .collect();
+        // let filtered: Vec<u8> = self
+        //     .grid
+        //     .clone()
+        //     .into_iter()
+        //     .filter(|x| x % 2 == 0)
+        //     .collect();
 
-        self.grid = filtered;
+        // self.grid = filtered;
     }
 
     pub fn draw_image(&mut self) {
@@ -123,4 +131,38 @@ impl Identicon {
 
         self.pixel_map = pixel_map;
     }
+
+    pub fn paint_pixels(&mut self) {
+        for x in 0..250 {
+            for y in 0..250 {
+                // let cx = y as f32 * scalex - 1.5;
+                // let cy = x as f32 * scaley - 1.5;
+
+                // let c = num_complex::Complex::new(-0.4, 0.6);
+                // let mut z = num_complex::Complex::new(cx, cy);
+
+                // let mut i = 0;
+                // while i < 255 && z.norm() <= 2.0 {
+                //     z = z * z + c;
+                //     i += 1;
+                // }
+
+                // let pixel = imgbuf.get_pixel_mut(x, y);
+                // let image::Rgb(data) = *pixel;
+                // *pixel = image::Rgb([data[0], i as u8, data[2]]);
+            }
+        }
+    }
 }
+
+// [ x    y  |   x    y
+// ((0,   0),  (50,  50)),
+// ((50,  0),  (100, 50)),
+// ((100, 0),  (150, 50)),
+// ((150, 0),  (200, 50)),
+// ((200, 0),  (250, 50)),
+// ((0,   50), (50,  100)),
+// ((50,  50), (100, 100)),
+// ((100, 50), (150, 100)),
+// ((150, 50), (200, 100))
+// ]
