@@ -1,28 +1,37 @@
 use std::vec;
 
-use image::{Rgb, RgbImage};
+use image::{ImageBuffer, Rgb, RgbImage};
 use md5;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Identicon {
     pub hex: Vec<u8>,
-    pub color: Vec<u8>,
+    pub color: [u8; 3],
     pub grid: Vec<(u8, u8)>,
-    pub pixel_map: Vec<((u8, u8), (u8, u8))>,
+    pub pixel_map: Vec<Square>,
+}
+
+#[derive(Debug, Clone)]
+pub struct Square {
+    top_left: Point,
+    bottom_right: Point,
+}
+
+#[derive(Debug, Clone)]
+pub struct Point {
+    x: u8,
+    y: u8,
 }
 
 impl Identicon {
-    pub fn hash_input(&mut self, input: &str) -> Vec<u8> {
-        // create a Md5 hasher instance
+    pub fn hash_input(&mut self, input: &str) {
         let digest = md5::compute(input);
         let hex = digest.as_slice().to_owned();
         self.hex = hex.clone();
-
-        hex
     }
 
     pub fn pick_color(&mut self) {
-        self.color = vec![self.hex[0], self.hex[1], self.hex[2]]
+        self.color = [self.hex[0], self.hex[1], self.hex[2]]
     }
 
     pub fn build_grid(&mut self) {
@@ -34,12 +43,12 @@ impl Identicon {
 
             row
         }
+
         let chunks: Vec<Vec<u8>> = self.hex.chunks(3).map(|x| x.to_vec()).collect();
 
         let mut grid: Vec<Vec<u8>> = vec![];
 
         for chunk in chunks {
-            // println!("{:?}", mirror_row(chunk.clone()));
             grid.push(mirror_row(chunk));
         }
 
@@ -54,7 +63,6 @@ impl Identicon {
         }
 
         self.grid = flat_with_index;
-        // println!("{:?}", flatened);
     }
 
     pub fn filter_odd_squares(&mut self) {
@@ -68,101 +76,54 @@ impl Identicon {
         self.grid = filtered;
     }
 
-    pub fn draw_image(&mut self) {
-        let imgx = 250;
-        let imgy = 250;
-
-        let scalex = 3.0 / imgx as f32;
-        let scaley = 3.0 / imgy as f32;
-
-        // Create a new ImgBuf with width: imgx and height: imgy
-        let mut imgbuf = image::ImageBuffer::new(imgx, imgy);
-
-        // Iterate over the coordinates and pixels of the image
-        for (x, y, pixel) in imgbuf.enumerate_pixels_mut() {
-            // let r = (0.3 * x as f32) as u8;
-            // let b = (0.3 * y as f32) as u8;
-            // *pixel = image::Rgb([r, 0, b]);
-
-            *pixel = image::Rgb([
-                self.color[0] as u8,
-                self.color[1].clone() as u8,
-                self.color[2].clone() as u8,
-            ]);
-        }
-
-        // A redundant loop to demonstrate reading image data
-        for x in 0..imgx {
-            for y in 0..imgy {
-                let cx = y as f32 * scalex - 1.5;
-                let cy = x as f32 * scaley - 1.5;
-
-                let c = num_complex::Complex::new(-0.4, 0.6);
-                let mut z = num_complex::Complex::new(cx, cy);
-
-                let mut i = 0;
-                while i < 255 && z.norm() <= 2.0 {
-                    z = z * z + c;
-                    i += 1;
-                }
-
-                let pixel = imgbuf.get_pixel_mut(x, y);
-                let image::Rgb(data) = *pixel;
-                *pixel = image::Rgb([data[0], i as u8, data[2]]);
-            }
-        }
-
-        // Save the image as “fractal.png”, the format is deduced from the path
-        imgbuf.save("identicon.png").unwrap();
-    }
-
     pub fn build_pixel_map(&mut self) {
-        let mut pixel_map: Vec<((u8, u8), (u8, u8))> = vec![];
+        let mut pixel_map: Vec<Square> = vec![];
         for item in self.grid.clone() {
             // let mut index = 0;
             let horizontal = (item.1 % 5) * 50;
             let vertical = (item.1 / 5) * 50;
 
-            let top_left = (horizontal, vertical);
-            let bottom_right = (horizontal + 50, vertical + 50);
+            let top_left = Point {
+                x: horizontal,
+                y: vertical,
+            };
+            let bottom_right = Point {
+                x: horizontal + 50,
+                y: vertical + 50,
+            };
 
-            pixel_map.push((top_left, bottom_right));
+            pixel_map.push(Square {
+                top_left,
+                bottom_right,
+            });
         }
 
         self.pixel_map = pixel_map;
     }
 
     pub fn paint_pixels(&mut self) {
-        for x in 0..250 {
-            for y in 0..250 {
-                // let cx = y as f32 * scalex - 1.5;
-                // let cy = x as f32 * scaley - 1.5;
+        let imgx = 250;
+        let imgy = 250;
 
-                // let c = num_complex::Complex::new(-0.4, 0.6);
-                // let mut z = num_complex::Complex::new(cx, cy);
+        // Create a new ImgBuf with width: imgx and height: imgy
+        let mut imgbuf = image::ImageBuffer::new(imgx, imgy);
 
-                // let mut i = 0;
-                // while i < 255 && z.norm() <= 2.0 {
-                //     z = z * z + c;
-                //     i += 1;
-                // }
-
-                // let pixel = imgbuf.get_pixel_mut(x, y);
-                // let image::Rgb(data) = *pixel;
-                // *pixel = image::Rgb([data[0], i as u8, data[2]]);
+        for (_x, _y, pixel) in imgbuf.enumerate_pixels_mut() {
+            *pixel = image::Rgb([250 as u8, 250 as u8, 250 as u8]);
+        }
+        for (x, y, pixel) in imgbuf.enumerate_pixels_mut() {
+            for square in self.pixel_map.clone() {
+                if x >= square.top_left.x.into()
+                    && x < square.bottom_right.x.into()
+                    && y >= square.top_left.y.into()
+                    && y < square.bottom_right.y.into()
+                {
+                    *pixel = image::Rgb(self.color);
+                }
             }
         }
+
+        // Save the image as “identicon.png”, the format is deduced from the path
+        imgbuf.save("identicon.png").unwrap();
     }
 }
-
-// [   X         Y
-// ((50, 0), (100, 50)),
-// ((150, 0), (200, 50)),
-// ((0, 50), (50, 100)),
-// ((150, 50), (200, 100)),
-// ((50, 100), (100, 150)),
-// ((100, 100), (150, 150)),
-// ((200, 100), (250, 150)),
-// ((0, 150), (50, 200)),
-// ((150, 200), (200, 250))
-// ]
