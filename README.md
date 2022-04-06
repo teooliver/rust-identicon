@@ -3,7 +3,8 @@
 Generate Identicon images based on a given `string`.
 
 ![habit-grid](./identicon.png)
-This is the identicon for "Banana";
+
+> ^ This is the identicon for "banana";
 
 ### Inspiration:
 
