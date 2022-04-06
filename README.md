@@ -1,6 +1,6 @@
 # Indeticon.rs
 
-Generate Identicon `.png` files base on `string`.
+Generate Identicon images based on a given `string`.
 
 This is the identicon for "Banana";
 ![habit-grid](./identicon.png)
