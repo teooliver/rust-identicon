@@ -6,11 +6,10 @@ fn main() {
         grid: vec![],
         pixel_map: vec![],
     };
-    identicon.hash_input("hello");
+    identicon.hash_input("banana");
     identicon.pick_color();
     identicon.build_grid();
     identicon.filter_odd_squares();
-    println!("PIXEL MAP ===> {:?}", identicon.grid);
     identicon.build_pixel_map();
     identicon.paint_pixels();
 }

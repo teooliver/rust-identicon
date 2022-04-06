@@ -6,24 +6,28 @@ use md5;
 #[derive(Debug, Clone)]
 pub struct Identicon {
     pub hex: Vec<u8>,
-    pub color: [u8; 3],
+    pub color: [u8; 3], // Refactor to tuple?
     pub grid: Vec<(u8, u8)>,
     pub pixel_map: Vec<Square>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Square {
     top_left: Point,
     bottom_right: Point,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Point {
     x: u8,
     y: u8,
 }
 
 impl Identicon {
+    pub fn new() {
+        todo!();
+    }
+
     pub fn hash_input(&mut self, input: &str) {
         let digest = md5::compute(input);
         let hex = digest.as_slice().to_owned();
@@ -49,6 +53,9 @@ impl Identicon {
         let mut grid: Vec<Vec<u8>> = vec![];
 
         for chunk in chunks {
+            if chunk.len() != 3 {
+                break;
+            }
             grid.push(mirror_row(chunk));
         }
 
@@ -56,7 +63,7 @@ impl Identicon {
 
         let mut flat_with_index: Vec<(u8, u8)> = vec![];
 
-        let mut index: u8 = 1;
+        let mut index: u8 = 0;
         for item in flatened {
             flat_with_index.push((item, index));
             index += 1;
@@ -125,5 +132,206 @@ impl Identicon {
 
         // Save the image as “identicon.png”, the format is deduced from the path
         imgbuf.save("identicon.png").unwrap();
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::identicon::{Identicon, Point, Square};
+
+    #[test]
+    fn hash_input_impl() {
+        let mut identicon = Identicon {
+            hex: vec![],
+            color: [0, 0, 0],
+            grid: vec![],
+            pixel_map: vec![],
+        };
+
+        identicon.hash_input("banana");
+
+        assert_eq!(
+            identicon.hex,
+            [114, 179, 2, 191, 41, 122, 34, 138, 117, 115, 1, 35, 239, 239, 124, 65]
+        );
+    }
+
+    #[test]
+    fn pick_color_impl() {
+        let mut identicon = Identicon {
+            hex: vec![
+                114, 179, 2, 191, 41, 122, 34, 138, 117, 115, 1, 35, 239, 239, 124, 65,
+            ],
+            color: [0, 0, 0],
+            grid: vec![],
+            pixel_map: vec![],
+        };
+
+        identicon.pick_color();
+
+        assert_eq!(identicon.color, [114, 179, 2]);
+    }
+    #[test]
+    fn build_grid_impl() {
+        let mut identicon = Identicon {
+            hex: vec![
+                114, 179, 2, 191, 41, 122, 34, 138, 117, 115, 1, 35, 239, 239, 124, 65,
+            ],
+            color: [114, 179, 2],
+            grid: vec![],
+            pixel_map: vec![],
+        };
+
+        identicon.build_grid();
+
+        assert_eq!(
+            identicon.grid,
+            [
+                (114, 0),
+                (179, 1),
+                (2, 2),
+                (179, 3),
+                (114, 4),
+                (191, 5),
+                (41, 6),
+                (122, 7),
+                (41, 8),
+                (191, 9),
+                (34, 10),
+                (138, 11),
+                (117, 12),
+                (138, 13),
+                (34, 14),
+                (115, 15),
+                (1, 16),
+                (35, 17),
+                (1, 18),
+                (115, 19),
+                (239, 20),
+                (239, 21),
+                (124, 22),
+                (239, 23),
+                (239, 24)
+            ]
+        );
+    }
+    #[test]
+    fn filter_odd_squares_impl() {
+        let mut identicon = Identicon {
+            hex: vec![
+                114, 179, 2, 191, 41, 122, 34, 138, 117, 115, 1, 35, 239, 239, 124, 65,
+            ],
+            color: [114, 179, 2],
+            grid: vec![
+                (114, 0),
+                (179, 1),
+                (2, 2),
+                (179, 3),
+                (114, 4),
+                (191, 5),
+                (41, 6),
+                (122, 7),
+                (41, 8),
+                (191, 9),
+                (34, 10),
+                (138, 11),
+                (117, 12),
+                (138, 13),
+                (34, 14),
+                (115, 15),
+                (1, 16),
+                (35, 17),
+                (1, 18),
+                (115, 19),
+                (239, 20),
+                (239, 21),
+                (124, 22),
+                (239, 23),
+                (239, 24),
+            ],
+            pixel_map: vec![],
+        };
+
+        identicon.filter_odd_squares();
+
+        assert_eq!(
+            identicon.grid,
+            [
+                (114, 0),
+                (2, 2),
+                (114, 4),
+                (122, 7),
+                (34, 10),
+                (138, 11),
+                (138, 13),
+                (34, 14),
+                (124, 22)
+            ]
+        );
+    }
+    #[test]
+    fn build_pixel_map_impl() {
+        let mut identicon = Identicon {
+            hex: vec![
+                114, 179, 2, 191, 41, 122, 34, 138, 117, 115, 1, 35, 239, 239, 124, 65,
+            ],
+            color: [114, 179, 2],
+            grid: vec![
+                (114, 1),
+                (2, 3),
+                (114, 5),
+                (122, 8),
+                (34, 11),
+                (138, 12),
+                (138, 14),
+                (34, 15),
+                (124, 23),
+            ],
+            pixel_map: vec![],
+        };
+
+        identicon.build_pixel_map();
+
+        assert_eq!(
+            identicon.pixel_map,
+            [
+                Square {
+                    top_left: Point { x: 50, y: 0 },
+                    bottom_right: Point { x: 100, y: 50 }
+                },
+                Square {
+                    top_left: Point { x: 150, y: 0 },
+                    bottom_right: Point { x: 200, y: 50 }
+                },
+                Square {
+                    top_left: Point { x: 0, y: 50 },
+                    bottom_right: Point { x: 50, y: 100 }
+                },
+                Square {
+                    top_left: Point { x: 150, y: 50 },
+                    bottom_right: Point { x: 200, y: 100 }
+                },
+                Square {
+                    top_left: Point { x: 50, y: 100 },
+                    bottom_right: Point { x: 100, y: 150 }
+                },
+                Square {
+                    top_left: Point { x: 100, y: 100 },
+                    bottom_right: Point { x: 150, y: 150 }
+                },
+                Square {
+                    top_left: Point { x: 200, y: 100 },
+                    bottom_right: Point { x: 250, y: 150 }
+                },
+                Square {
+                    top_left: Point { x: 0, y: 150 },
+                    bottom_right: Point { x: 50, y: 200 }
+                },
+                Square {
+                    top_left: Point { x: 150, y: 200 },
+                    bottom_right: Point { x: 200, y: 250 }
+                }
+            ]
+        );
     }
 }
