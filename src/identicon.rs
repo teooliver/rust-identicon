@@ -72,7 +72,7 @@ impl Identicon {
         self.grid = flat_with_index;
     }
 
-    pub fn filter_odd_squares(&mut self) {
+    pub fn remove_odd_squares(&mut self) {
         let filtered: Vec<(u8, u8)> = self
             .grid
             .clone()
@@ -252,7 +252,7 @@ mod tests {
             pixel_map: vec![],
         };
 
-        identicon.filter_odd_squares();
+        identicon.remove_odd_squares();
 
         assert_eq!(
             identicon.grid,
