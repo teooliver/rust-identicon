@@ -1,12 +1,12 @@
 use std::vec;
 
-use image::{ImageBuffer, Rgb, RgbImage};
+use image;
 use md5;
 
 #[derive(Debug, Clone)]
 pub struct Identicon {
     pub hex: Vec<u8>,
-    pub color: [u8; 3], // Refactor to tuple?
+    pub color: [u8; 3], // TODO: Refactor to tuple?
     pub grid: Vec<(u8, u8)>,
     pub pixel_map: Vec<Square>,
 }
