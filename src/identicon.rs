@@ -6,7 +6,7 @@ use md5;
 #[derive(Debug, Clone)]
 pub struct Identicon {
     pub hex: Vec<u8>,
-    pub color: [u8; 3], // TODO: Refactor to tuple?
+    pub color: [u8; 3], // TODO: Refactor to tuple? Or maybe a struct? RBG{r:0,g:0,b:0}
     pub grid: Vec<(u8, u8)>,
     pub pixel_map: Vec<Square>,
 }
@@ -140,6 +140,7 @@ impl Identicon {
     }
 }
 
+// Extract to __tests__ folder
 #[cfg(test)]
 mod tests {
     use crate::identicon::{Identicon, Point, Square};
