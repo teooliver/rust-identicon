@@ -1,11 +1,6 @@
 mod identicon;
 fn main() {
-    let mut identicon = identicon::Identicon {
-        hex: vec![],
-        color: [0, 0, 0],
-        grid: vec![],
-        pixel_map: vec![],
-    };
+    let mut identicon = identicon::Identicon::new();
     identicon.hash_input("banana");
     identicon.pick_color();
     identicon.build_grid();

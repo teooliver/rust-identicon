@@ -24,8 +24,13 @@ pub struct Point {
 }
 
 impl Identicon {
-    pub fn new() {
-        todo!();
+    pub fn new() -> Self {
+        Identicon {
+            hex: vec![],
+            color: [0, 0, 0],
+            grid: vec![],
+            pixel_map: vec![],
+        }
     }
 
     pub fn hash_input(&mut self, input: &str) {
