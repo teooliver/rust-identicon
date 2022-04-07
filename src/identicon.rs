@@ -113,7 +113,7 @@ impl Identicon {
         self.pixel_map = pixel_map;
     }
 
-    pub fn paint_pixels(&mut self) {
+    pub fn paint_pixels(&mut self, image_name: &str) {
         let imgx = 250;
         let imgy = 250;
 
@@ -136,7 +136,8 @@ impl Identicon {
         }
 
         // Save the image as “identicon.png”, the format is deduced from the path
-        imgbuf.save("identicon.png").unwrap();
+
+        imgbuf.save(format!("{}.png", &image_name)).unwrap();
     }
 }
 
