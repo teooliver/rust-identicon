@@ -136,7 +136,6 @@ impl Identicon {
         }
 
         // Save the image as “identicon.png”, the format is deduced from the path
-
         imgbuf.save(format!("{}.png", &image_name)).unwrap();
     }
 }

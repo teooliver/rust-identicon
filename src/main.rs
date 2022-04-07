@@ -4,10 +4,12 @@ use clap::Parser;
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
 struct Args {
-    /// Name of the component
+    /// Name of the image
     #[clap(short, long)]
     identicon_name: String,
+    resolution: String,
 }
+
 fn main() {
     let args = Args::parse();
     let identicon_name = args.identicon_name;
