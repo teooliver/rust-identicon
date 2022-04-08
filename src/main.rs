@@ -7,7 +7,6 @@ struct Args {
     /// Name of the image
     #[clap(short, long)]
     identicon_name: String,
-    resolution: String,
 }
 
 fn main() {

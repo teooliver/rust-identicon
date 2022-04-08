@@ -140,7 +140,6 @@ impl Identicon {
     }
 }
 
-// Extract to __tests__ folder
 #[cfg(test)]
 mod tests {
     use crate::identicon::{Identicon, Point, Square};

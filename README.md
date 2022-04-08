@@ -12,6 +12,5 @@ Generate Identicon images based on a given `string`.
 
 ### Roadmap:
 
-- Make the 'resolution' of squares configurable
 - Output to css/svg?
-- Library for Yew.rs
+- Library for Yew.rs?
